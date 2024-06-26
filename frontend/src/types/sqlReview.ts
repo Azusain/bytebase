@@ -8,9 +8,9 @@ import {
 } from "@/types/proto/v1/org_policy_service";
 import type { PlanType } from "@/types/proto/v1/subscription_service";
 import sqlReviewSchema from "./sql-review-schema.yaml";
-import sqlReviewDevTemplate from "./sql-review.dev.yaml";
-import sqlReviewProdTemplate from "./sql-review.prod.yaml";
-import sqlReviewSampleTemplate from "./sql-review.sample.yaml";
+import sqlReviewDevTemplate from "../../../backend/plugin/advisor/config/sql-review.dev.yaml";
+import sqlReviewProdTemplate from "../../../backend/plugin/advisor/config/sql-review.prod.yaml";
+import sqlReviewSampleTemplate from "../../../backend/plugin/advisor/config/sql-review.sample.yaml";
 
 export const LEVEL_LIST = [
   SQLReviewRuleLevel.ERROR,

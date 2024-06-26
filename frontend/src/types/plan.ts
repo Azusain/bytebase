@@ -3,7 +3,7 @@ import {
   PlanType,
   planTypeFromJSON,
 } from "@/types/proto/v1/subscription_service";
-import planData from "./plan.yaml";
+import planData from "../../../backend/enterprise/api/plan.yaml";
 
 // Check api/plan.go to understand what each feature means.
 export type FeatureType =
