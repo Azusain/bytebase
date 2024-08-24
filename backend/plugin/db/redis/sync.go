@@ -12,7 +12,9 @@ import (
 	storepb "github.com/bytebase/bytebase/proto/generated-go/store"
 )
 
-// Sync schema
+const (
+	maxRedisDatabases int = 16
+)
 
 // SyncInstance syncs the instance metadata.
 func (d *Driver) SyncInstance(ctx context.Context) (*db.InstanceMetadata, error) {
@@ -98,10 +100,10 @@ func (d *Driver) getClusterEnabled(ctx context.Context) (bool, error) {
 func (d *Driver) getDatabaseCount(ctx context.Context) (int, error) {
 	val, err := d.rdb.ConfigGet(ctx, "databases").Result()
 	if err != nil {
-		// Cloud vendors may have disabled this command.
-		// In that case, we return 1.
+		// Cloud vendors may have disabled this command,
+		// so we test if databases exist by using select command.
 		if strings.Contains(err.Error(), "unknown command") {
-			return 1, nil
+			return d.getDatabaseCountUsingSelect(ctx)
 		}
 		return 0, err
 	}
@@ -111,6 +113,20 @@ func (d *Driver) getDatabaseCount(ctx context.Context) (int, error) {
 	count, err := strconv.Atoi(val["databases"])
 	if err != nil {
 		return 0, errors.Wrapf(err, "failed to convert to int from %v", val["databases"])
+	}
+	return count, nil
+}
+
+func (d *Driver) getDatabaseCountUsingSelect(ctx context.Context) (int, error) {
+	var count int
+	for count < maxRedisDatabases {
+		if err := d.rdb.Do(ctx, "SELECT", count).Err(); err != nil {
+			if strings.Contains(err.Error(), "index is out of range") {
+				break
+			}
+			return 0, err
+		}
+		count++
 	}
 	return count, nil
 }
